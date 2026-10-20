@@ -1,0 +1,621 @@
+<title>Ринок продуктів для батьків</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Golos+Text:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: аналітичний звіт-інструмент — вузька колонка тексту, широкі блоки для матриці й карти; зверху зміст-навігація */
+:root{
+  --bg:#F3F6F4; --surface:#FFFFFF; --sunk:#E6ECE8; --ink:#16201B; --muted:#5B6862; --line:#D2DBD6;
+  --accent:#2C6A57; --accent-soft:#D6E8E0; --gold:#C98516; --gold-soft:#F7E6C6; --red:#B4483B; --red-soft:#F4DCD8;
+  --f-display:"Unbounded","Golos Text",system-ui,sans-serif;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111613; --surface:#18201C; --sunk:#202A25; --ink:#E4ECE7; --muted:#97A59E; --line:#2E3A34;
+  --accent:#72C4A8; --accent-soft:#1F3A31; --gold:#EDB458; --gold-soft:#3A2E17; --red:#E58A7E; --red-soft:#3D221E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#18201C; --sunk:#202A25; --ink:#E4ECE7; --muted:#97A59E; --line:#2E3A34;
+  --accent:#72C4A8; --accent-soft:#1F3A31; --gold:#EDB458; --gold-soft:#3A2E17; --red:#E58A7E; --red-soft:#3D221E; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(28px,4.6vw,48px);line-height:1.08;font-weight:700}
+h2{font-size:clamp(21px,2.6vw,28px);line-height:1.2;font-weight:700}
+h3{font-size:17px;font-weight:500;line-height:1.3}
+p{margin:0}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+section{padding-block:56px 8px;display:grid;gap:22px;scroll-margin-top:60px}
+.lead{font-size:18px;color:var(--muted);max-width:66ch}
+
+/* nav */
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));overflow-x:auto;white-space:nowrap}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+nav.toc .in{max-width:1180px;margin:0 auto;display:flex;gap:6px}
+nav.toc a{font-size:13px;text-decoration:none;color:var(--ink);padding:6px 10px;border-radius:999px;background:var(--sunk)}
+nav.toc a:hover{background:var(--accent-soft)}
+
+/* hero */
+header.hero{padding-block:44px 8px;display:grid;gap:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:2px}
+.stat b{font-family:var(--f-display);font-size:28px;font-weight:500}
+.stat span{font-size:13px;color:var(--muted)}
+.thesis{background:var(--ink);color:var(--bg);border-radius:12px;padding:22px 24px;display:grid;gap:10px}
+.thesis p{font-size:18px;line-height:1.5;max-width:75ch}
+.thesis .eyebrow{color:var(--bg);opacity:.7}
+
+/* filters */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip .n{font-family:var(--f-mono);opacity:.6;margin-left:4px}
+
+/* cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;display:grid;grid-template-rows:auto auto 1fr auto;overflow:hidden;min-width:0}
+.card.us{border:2px solid var(--gold)}
+.shot{background:var(--sunk);padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line)}
+.shot .ico{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);flex:none}
+.shot .ico svg{width:20px;height:20px}
+.shot .url{font-family:var(--f-mono);font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.card .top{padding:14px 16px 6px;display:grid;gap:6px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.tag.free{background:var(--accent-soft);color:var(--accent)}
+.tag.paid{background:var(--gold-soft);color:var(--gold)}
+.price{font-family:var(--f-mono);font-size:14px;font-weight:500}
+.card .body{padding:4px 16px 12px;display:grid;gap:10px;font-size:14px}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:4px 10px}
+.kv dt{color:var(--muted);font-size:12.5px}
+.kv dd{margin:0}
+.pm{display:grid;gap:6px}
+.pm div{display:grid;grid-template-columns:18px 1fr;gap:6px}
+.pm .plus{color:var(--accent);font-weight:600}
+.pm .minus{color:var(--red);font-weight:600}
+.signal{background:var(--gold-soft);border-radius:8px;padding:8px 10px;font-size:13.5px}
+.signal b{color:var(--gold)}
+.card .foot{padding:10px 16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:12px;font-size:13.5px}
+.card .foot a{text-decoration:none;font-weight:500}
+.card .foot a::after{content:" ↗"}
+.unverified{font-size:12px;color:var(--muted);font-style:italic}
+
+/* matrix */
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table.mx{border-collapse:collapse;font-size:13px;min-width:1060px;width:100%}
+.mx th,.mx td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:center}
+.mx thead th{font-weight:500;font-size:11.5px;color:var(--muted);vertical-align:bottom;line-height:1.25;height:96px}
+.mx thead th span{display:inline-block;max-width:84px}
+.mx th.name,.mx td.name{text-align:left;position:sticky;left:0;background:var(--surface);min-width:200px;max-width:230px;z-index:1;border-right:1px solid var(--line)}
+.mx tr.grp td{background:var(--sunk);text-align:left;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mx tr.grp td.name{background:var(--sunk)}
+.mx tr.us td{background:var(--gold-soft)}
+.mx tr.us td.name{background:var(--gold-soft);font-weight:600}
+.mx tfoot td{font-family:var(--f-mono);font-size:12px;font-weight:500}
+.mx tfoot td.name{font-family:var(--f-body)}
+.dot{display:inline-block;width:13px;height:13px;border-radius:50%;vertical-align:middle}
+.d2{background:var(--accent)}
+.d1{background:linear-gradient(90deg,var(--accent) 50%,transparent 50%);border:1.5px solid var(--accent)}
+.d0{border:1.5px solid var(--line)}
+.dq{color:var(--muted);font-family:var(--f-mono);font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);align-items:center}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+
+/* coverage */
+.cov{display:grid;gap:8px}
+.covrow{display:grid;grid-template-columns:minmax(150px,280px) 1fr 52px;gap:12px;align-items:center;font-size:14px}
+.bar{height:14px;background:var(--sunk);border-radius:4px;position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;border-radius:4px}
+.lvl-hi i{background:var(--muted)}
+.lvl-mid i{background:var(--accent)}
+.lvl-lo i{background:var(--gold)}
+.ticks{display:grid;grid-template-columns:minmax(150px,280px) 1fr 52px;gap:12px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.ticks .t{display:flex;justify-content:space-between}
+
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.col{border-radius:12px;padding:18px;display:grid;gap:12px;align-content:start;border:1px solid var(--line);background:var(--surface)}
+.col h3{font-size:16px}
+.col.hi{border-top:5px solid var(--muted)}
+.col.mid{border-top:5px solid var(--accent)}
+.col.lo{border-top:5px solid var(--gold)}
+.col ul{margin:0;padding-left:18px;display:grid;gap:10px;font-size:14.5px}
+.col li b{display:block}
+.col .verdict{font-size:13px;color:var(--muted)}
+
+/* map */
+.map{display:grid;grid-template-columns:110px repeat(4,minmax(0,1fr));gap:4px;font-size:12.5px}
+.map .h{font-family:var(--f-mono);font-size:11px;color:var(--muted);padding:6px;display:flex;align-items:flex-end}
+.map .yl{font-family:var(--f-mono);font-size:11px;color:var(--muted);padding:6px;display:flex;align-items:center}
+.cell{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;min-height:64px}
+.cell.empty{background:repeating-linear-gradient(45deg,var(--sunk) 0 6px,transparent 6px 12px)}
+.pin{padding:2px 7px;border-radius:999px;background:var(--sunk);font-size:11.5px;line-height:1.4}
+.pin.us{background:var(--gold);color:var(--surface);font-weight:600}
+.pin.intl{border:1px dashed var(--muted);background:transparent}
+.mapwrap{overflow-x:auto}
+.mapwrap .map{min-width:720px}
+
+/* price chart */
+.pc{display:grid;gap:7px}
+.prow{display:grid;grid-template-columns:minmax(140px,240px) 1fr;gap:12px;align-items:center;font-size:13.5px}
+.ptrack{position:relative;height:22px}
+.pbar{position:absolute;top:3px;height:16px;border-radius:3px;background:var(--accent)}
+.pbar.range{background:transparent;border:2px solid var(--accent)}
+.pbar.us{background:var(--gold)}
+.pbar.intl{background:var(--muted)}
+.pval{position:absolute;top:1px;font-family:var(--f-mono);font-size:12px;white-space:nowrap}
+.pband{position:absolute;top:0;bottom:0;background:var(--red-soft);border-left:1px dashed var(--red);border-right:1px dashed var(--red)}
+.paxis{position:relative;height:18px;font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.paxis span{position:absolute;transform:translateX(-50%)}
+.brk{position:absolute;top:0;width:10px;height:22px;background:repeating-linear-gradient(110deg,transparent 0 3px,var(--surface) 3px 5px)}
+
+/* recs */
+.recs{display:grid;gap:12px}
+.rec{display:grid;grid-template-columns:120px 1fr;gap:16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.rec .k{font-family:var(--f-mono);font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding-top:3px}
+.rec.do .k{color:var(--accent)} .rec.skip .k{color:var(--muted)} .rec.risk .k{color:var(--red)} .rec.steal .k{color:var(--gold)}
+.rec ul{margin:0;padding-left:18px;display:grid;gap:8px}
+.note{font-size:13.5px;color:var(--muted);max-width:80ch}
+.src{columns:2 320px;font-size:13px;padding-left:18px}
+.src li{margin-bottom:4px;break-inside:avoid}
+@media (max-width:560px){
+  .rec{grid-template-columns:1fr;gap:6px}
+  .covrow,.ticks{grid-template-columns:118px 1fr 40px;gap:8px;font-size:12.5px}
+  .prow{grid-template-columns:112px 1fr;font-size:12px}
+  .kv{grid-template-columns:84px 1fr}
+  .cards{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:no-preference){.bar i,.pbar{transition:width .5s ease}}
+
+/* ideas */
+.ideas{display:grid;gap:12px}
+.idea{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:10px 24px}
+.idea .l{display:grid;gap:8px;align-content:start}
+.idea .from{font-size:13px;color:var(--muted)}
+.idea .why{font-size:14px}
+.idea .r{display:grid;gap:8px;font-size:14px;align-content:start}
+.idea ol{margin:0;padding-left:20px;display:grid;gap:5px}
+.idea .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted)}
+.idea .meta b{color:var(--ink);font-weight:500}
+.badge{font-style:normal;font-size:12px;font-weight:500;padding:3px 10px;border-radius:999px;justify-self:start}
+.b-yes{background:var(--accent-soft);color:var(--accent)}
+.b-later{background:var(--gold-soft);color:var(--gold)}
+.b-no{background:var(--sunk);color:var(--muted)}
+.idea.no{background:transparent}
+@media (max-width:720px){.idea{grid-template-columns:1fr}}
+</style>
+
+<nav class="toc" aria-label="Розділи"><div class="in">
+  <a href="#vysnovky">Головне</a><a href="#karta">Карта ринку</a><a href="#katalog">Каталог</a><a href="#matrytsia">Матриця</a><a href="#pokryttia">Що є в усіх</a><a href="#tsiny">Ціни</a><a href="#dlia-nas">Що робимо ми</a><a href="#beremo">Ідеї конкурентів</a><a href="#dzherela">Джерела</a>
+</div></nav>
+
+<div class="wrap">
+<header class="hero" id="vysnovky">
+  <div class="eyebrow">PRO Батьків · KR1</div>
+  <h1>Ринок продуктів для батьків в Україні</h1>
+  <p class="lead">Платні клуби, курси, Telegram-канали, державні й громадські програми, групи підтримки, шкільні ініціативи і три міжнародні продукти для порівняння. Кожен продукт оцінено за 14 ознаками, тож видно, що є в усіх, а чого немає ні в кого.</p>
+  <div class="stats" id="stats"></div>
+  <div class="thesis">
+    <div class="eyebrow">Головний висновок</div>
+    <p>Український ринок розколотий навпіл. Безкоштовне від держави, ЮНІСЕФ і психологів дає багато контенту про війну, стрес і малюків 0–6, але без живої розмови і спільноти. Платні клуби дають спільноту, але вони для мам, тримаються на одній відомій особі і коштують 490–1200 грн/міс. Регулярного клубу саме для батьків школярів 5–17, з віковими гілками і зв'язком із навчанням дитини, немає ні в кого.</p>
+  </div>
+</header>
+
+<section id="karta">
+  <div class="prose" style="display:grid;gap:10px">
+    <div class="eyebrow">01 · Карта ринку</div>
+    <h2>Де порожньо: недорого і наживо</h2>
+    <p>По горизонталі — скільки коштує місяць. По вертикалі — скільки в продукті живого спілкування. Ми дивились на дві речі: чи є регулярні живі зустрічі і чи можуть батьки спілкуватися між собою. Угорі продукти, де є і те, і інше. Унизу ті, де можна лише читати або дивитися самому. Пунктирна рамка означає міжнародний продукт.</p>
+  </div>
+  <div class="mapwrap"><div class="map" id="map"></div></div>
+  <p class="note">У верхньому рядку безкоштовного стовпця лише групи підтримки, які тривають 1–4 місяці і зосереджені на стресі дорослих. У стовпці «до 500 грн» верхня клітинка порожня без PRO Батьків: SuperMamaClub рядком нижче, бо регулярних живих зустрічей у нього не вказано.</p>
+</section>
+
+<section id="katalog">
+  <div class="prose" style="display:grid;gap:10px">
+    <div class="eyebrow">02 · Каталог</div>
+    <h2>Усі продукти з посиланнями</h2>
+    <p>Фільтруйте за типом. У кожній картці: ціна, формат, для кого, що є, чого бракує, і що з цього бере PRO Батьків.</p>
+  </div>
+  <div class="filters" id="filters" role="group" aria-label="Фільтр за типом"></div>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section id="matrytsia">
+  <div class="prose" style="display:grid;gap:10px">
+    <div class="eyebrow">03 · Порівняльна матриця</div>
+    <h2>14 ознак × усі продукти</h2>
+  </div>
+  <div class="legend">
+    <span><i class="dot d2"></i> є</span><span><i class="dot d1"></i> частково</span><span><i class="dot d0"></i> немає</span><span><b class="dq">?</b> не вдалося перевірити</span>
+  </div>
+  <div class="scroll"><table class="mx" id="mx"></table></div>
+  <p class="note">Підсумковий рядок показує, яка частка українських продуктів має ознаку (повна = 1, часткова = 0,5). Міжнародні продукти і PRO Батьків у підрахунок не входять.</p>
+</section>
+
+<section id="pokryttia">
+  <div class="prose" style="display:grid;gap:10px">
+    <div class="eyebrow">04 · Що є в усіх, а чого немає</div>
+    <h2>Що не робить нас особливими і де наш шанс</h2>
+  </div>
+  <div class="cov" id="cov"></div>
+  <div class="three">
+    <div class="col hi">
+      <h3>Є майже в усіх</h3>
+      <p class="verdict">Робимо обов'язково, але в продажах не подаємо як перевагу</p>
+      <ul>
+        <li><b>Психолог або фахівець веде</b>Без цього продукт не сприймають серйозно. Наша перевага не в тому, що «у нас психолог».</li>
+        <li><b>Записи і бібліотека матеріалів</b>Є навіть у безкоштовних держкурсах. Сам архів записів не продасть клуб.</li>
+        <li><b>Безкоштовний вхід</b>Держава, ЮНІСЕФ і психологи віддають багато безкоштовно, тому відкритий канал з порадами нікого не здивує. Він потрібен лише як вітрина.</li>
+        <li><b>Готові фрази й шаблони</b>Є в більшості курсів. Шпаргалка після зустрічі потрібна, але сама по собі не унікальна.</li>
+        <li><b>Теми війни, тривоги, стресу</b>Їх закривають Ройз, «Ти як?», ПОРУЧ, Дія.Освіта. Робити з цього головну тему означає змагатися з безкоштовним.</li>
+      </ul>
+    </div>
+    <div class="col mid">
+      <h3>Є в небагатьох</h3>
+      <p class="verdict">Робимо краще і доступніше, ніж конкуренти</p>
+      <ul>
+        <li><b>Живі зустрічі щотижня</b>Регулярно є лише в Be Happy (≈1060 грн/міс) і в групах підтримки, які закінчуються за 1–4 місяці. Наш щосередовий ефір за 390 грн тут сильний.</li>
+        <li><b>Спільнота між ефірами</b>Чати є в платних клубах для мам. Для батьків школярів спільноти немає.</li>
+        <li><b>Тати поруч із мамами</b>Окремі тато-проєкти є (Батько 24/7, Tatohub), платні клуби для мам. Спільного простору для обох батьків немає, і це варто підкреслювати.</li>
+        <li><b>Усе в телефоні</b>Більшість живе в Zoom, на платформах курсів або в застосунках. Telegram з гілками простіший.</li>
+      </ul>
+    </div>
+    <div class="col lo">
+      <h3>Немає ні в кого</h3>
+      <p class="verdict">Наша відмінність, на ній будуємо позиціонування</p>
+      <ul>
+        <li><b>Вікові гілки 5–7 · 8–12 · 13–17 у спільноті</b>В Україні вікові розділи є лише в застосунку Be Happy. Спільноти, поділеної за віком школяра, немає.</li>
+        <li><b>Зв'язок із навчанням і навичками дитини</b>Мотивація, гаджети як інструмент, профорієнтація. Є лише в разових шкільних подіях (Optima, Форум неІдеальних батьків).</li>
+        <li><b>Гаджети, ігри і ШІ як постійна тема</b>Держава дає серіали про безпеку в інтернеті, але без розмови. Академія з IT-курсами говорить про це від першої особи.</li>
+        <li><b>Клуб у подарунок від школи дитини</b>Ні Optima, ні інші школи не дають батькам учнів постійну спільноту, лише разові вебінари.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="tsiny">
+  <div class="prose" style="display:grid;gap:10px">
+    <div class="eyebrow">05 · Ціни</div>
+    <h2>Скільки коштує місяць</h2>
+    <p>Ціна за місяць при помісячній оплаті; рамка без заливки означає діапазон. Червона смуга показує одну консультацію дитячого психолога (1000–1800 грн, середній сегмент). Валюти перераховано за орієнтовним курсом 1 € ≈ 48 грн, 1 $ ≈ 41,5 грн.</p>
+  </div>
+  <div class="pc" id="pc"></div>
+  <p class="note">390 грн у PRO Батьків нижче за найближчий український аналог SuperMamaClub (490 грн) і майже втричі нижче за Be Happy Children та Good Inside. Це приблизно третина однієї сесії з психологом за чотири живі зустрічі на місяць. Знижувати ціну немає потреби.</p>
+</section>
+
+<section id="dlia-nas">
+  <div class="prose" style="display:grid;gap:10px">
+    <div class="eyebrow">06 · Висновки для PRO Батьків</div>
+    <h2>Що закриваємо і чого не робимо</h2>
+  </div>
+  <div class="recs">
+    <div class="rec do"><div class="k">Закриваємо</div><ul>
+      <li>Позиціонуємось як <b>клуб батьків школярів 5–17</b>, а не «ще одна порада психолога». Ця ніша на ринку порожня.</li>
+      <li>У кожному анонсі говоримо про <b>навчання, мотивацію, гаджети і ШІ</b> разом із почуттями. Це тема, яку академія може вести від першої особи.</li>
+      <li>Пишемо <b>«для мам і тат»</b> у тексті і запрошуємо тат-гостей на круглі столи. Так ми відрізняємось від мамських клубів.</li>
+      <li>Подаємо клуб як <b>подарунок від школи</b> для батьків учнів. Жодна онлайн-школа цього не робить.</li>
+    </ul></div>
+    <div class="rec skip"><div class="k">Не робимо</div><ul>
+      <li>Курс із кінцем і сертифікатом. Безкоштовних курсів із сертифікатами багато (Ти як?, Дія.Освіта, Зрозуміло!).</li>
+      <li>Контент про немовлят 0–3. Цю нішу закривають ЮНІСЕФ, держава і платні клуби для мам.</li>
+      <li>Терапевтичні групи підтримки. Це робота ПОРУЧ і «Важливих», ми про щоденне виховання.</li>
+    </ul></div>
+    <div class="rec risk"><div class="k">Ризики</div><ul>
+      <li>Безкоштовні канали з 13 тис. підписників привчають, що поради нічого не коштують. Платимо за живу розмову і спільноту, а не за поради, і так це й пояснюємо.</li>
+      <li>Платні клуби тримаються на відомому імені (Романенко, Карпачов). Нам потрібне сильне обличчя психологині: фото, досвід, короткі відео.</li>
+      <li>У Be Happy Children уже є вікові розділи, ефіри двічі на тиждень і застосунок. Вони найближчий конкурент для батьків, готових платити.</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="beremo">
+  <div class="prose" style="display:grid;gap:10px">
+    <div class="eyebrow">07 · Ідеї конкурентів</div>
+    <h2>Що варто взяти і як це зробити в нашому Telegram</h2>
+    <p>Кожну ідею перевірено на три питання: чи вона потрібна батькам школярів, чи працює в Telegram без нових платформ і чи потягне її команда MVP (модератор 5–7 год на тиждень). Звідси три рішення.</p>
+  </div>
+  <div class="legend"><span><i class="badge b-yes">Беремо в MVP 1</i></span><span><i class="badge b-later">Відкладаємо до MVP 2</i></span><span><i class="badge b-no">Не беремо</i></span></div>
+  <div class="ideas" id="ideas"></div>
+</section>
+
+<section id="dzherela">
+  <div class="prose" style="display:grid;gap:10px">
+    <div class="eyebrow">Методологія і джерела</div>
+    <h2>Як збирали дані</h2>
+    <p class="note">Дані взято з сайтів продуктів, Telegram-каналів і новин станом на 20.10.2026. Оцінки в матриці відображають лише те, що продукт сам заявляє на своїх сторінках. Знак «?» стоїть там, де сторінка цього не каже. Скріншоти сайтів у сторінку вбудувати не вдалося, бо вона не може завантажувати зображення з інших сайтів; замість цього кожна картка веде на сайт продукту.</p>
+    <p class="note">Не вдалося відкрити й перевірити: «Клуб для батьків» dytyna.com.ua, курс «Врівноважені батьки» (sychynska.com), Instagram-клуб 4Mamas, сторінку «Клубу щасливих мам» (дані про нього взято з попереднього аналізу PRO Батьків). Ціни деяких курсів (Підліткологія, курс Сабліної) на сайтах не вказані.</p>
+  </div>
+  <ol class="src" id="src"></ol>
+</section>
+</div>
+
+<script>
+const F=[
+ ["ua","Українською"],["school","Фокус на школярах 6–17"],["live","Живі зустрічі щотижня"],["comm","Спільнота між зустрічами"],
+ ["age","Розподіл за віком дитини"],["expert","Веде психолог або фахівець"],["rec","Записи, бібліотека"],["mobile","Усе в телефоні"],
+ ["tools","Готові фрази, шаблони"],["dads","Свідомо для тат теж"],["dev","Зв'язок із навчанням дитини"],["digital","Гаджети, ігри, ШІ"],
+ ["sub","Постійний продукт, не курс"],["free","Безкоштовний вхід"]
+];
+const CAT={club:"Платні клуби і підписки",course:"Платні курси",tg:"Безкоштовні Telegram-канали",free:"Безкоштовні курси, держава, НГО",group:"Групи підтримки",school:"Школи для батьків учнів",intl:"Міжнародні для порівняння"};
+const ICO={
+ tg:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 4 3 11l6 2 2 6 3-4 5 4z"/><path d="m9 13 8-6"/></svg>',
+ web:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M7 6.5h.01M10 6.5h.01"/></svg>',
+ app:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18h2"/></svg>',
+ zoom:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="6" width="13" height="12" rx="2"/><path d="m15.5 10.5 6-3.5v10l-6-3.5"/></svg>',
+ video:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>',
+ people:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M15 20c0-2.5 1-4.5 3-4.8 2 .3 3 2.3 3 4.8"/></svg>'
+};
+// m — ціна за місяць у грн для карти (0 = безкоштовно), v — 14 оцінок у порядку F
+const P=[
+{id:"supermama",n:"SuperMamaClub",by:"Дмитро Карпачов",cat:"club",ic:"web",price:"490 грн/міс, автосписання",m:490,
+ fmt:"Онлайн-уроки щотижневими блоками, майстер-класи, розбір запитань, чат мам",who:"Мами дітей і підлітків, вік не вказано",freq:"Тижневі блоки уроків; частоту живих ефірів не вказано",
+ v:"21120121200?20",plus:["Підписка з автосписанням і відпискою будь-коли","Чат мам і архів усіх попередніх матеріалів"],minus:["Лише для мам, тримається на імені ведучого","Немає вікового поділу і зв'язку з навчанням"],
+ sig:"Найближчий аналог за ціною і моделлю. Наші 390 грн нижчі, а щотижневий живий ефір і вікові гілки дають більше.",url:"https://online.karpachoff.com/supermamaclub/subscribe/v2"},
+{id:"bhc",n:"Be Happy Children",by:"Марина Романенко",cat:"club",ic:"app",price:"22 €/міс · 99 €/6 міс · 190 €/рік",m:1056,
+ fmt:"Застосунок: 49 уроків, прямі ефіри-відповіді двічі на тиждень, закритий Telegram-чат",who:"Батьки дітей 0–20; розділи 0–3, 4–7, 8–12, 13–17, 18–20",freq:"2 ефіри на тиждень (8 на місяць)",
+ v:"22222222111?21",plus:["Вікові розділи, ефіри двічі на тиждень, 7 днів безкоштовно","Психологиня з 27 роками практики"],minus:["Удвічі-втричі дорожче за нас, ціна в євро","Немає теми навчання і цифрових навичок як окремого напряму"],
+ sig:"Головний платний конкурент. Беремо пробний тиждень і ритуал відповідей на запитання; виграємо ціною і темою навчання.",url:"https://proroditeli.com/app-ua"},
+{id:"bhs",n:"Be Happy Space",by:"Марина Романенко",cat:"club",ic:"app",price:"300 €/рік (≈1200 грн/міс)",m:1200,
+ fmt:"Річна підписка: 40+ тренінгів, ШІ-куратор 24/7, 15 000 відеовідповідей, 2 ефіри на тиждень",who:"Жінки; батьківство як одна з трьох тем",freq:"2 живі ефіри на тиждень (104 на рік)",
+ v:"21220222100?20",plus:["ШІ-куратор, який відповідає за 30 секунд","Величезна бібліотека відповідей на реальні ситуації"],minus:["Для жінок, не для обох батьків","Лише річна оплата"],
+ sig:"Показує, куди рухається ринок: ШІ-помічник між ефірами. Ідея для MVP 2.",url:"https://proroditeli.com/bhs"},
+{id:"happymoms",n:"Клуб щасливих мам",by:"авторський клуб",cat:"club",ic:"zoom",price:"1000–2700 грн за тариф",m:null,mr:[1000,2700],
+ fmt:"11 уроків у записі, 2–4 зустрічі в Zoom на місяць, Telegram-чат, консультації в старших тарифах",who:"Мами, без фокусу на віці",freq:"2–4 зустрічі на місяць",
+ v:"20120221100?00",plus:["Поєднання записаних уроків і живих зустрічей","Чат і консультації"],minus:["Курс із кінцем, а не постійна спільнота","Лише для мам"],
+ sig:"Підтверджує, що мами платять за живі зустрічі. Ми робимо їх постійними.",url:"http://clubhappymoms.tilda.ws/",unv:"Сторінка не відкрилась, дані з попереднього аналізу PRO Батьків"},
+{id:"mamsclub",n:"Клуб майбутніх і теперішніх мам",by:"холістичний центр",cat:"club",ic:"people",price:"2700 грн за 6 міс (≈450 грн/міс)",m:450,
+ fmt:"Закрита Facebook-група, 5 експертів",who:"Вагітні і мами дітей 0–3",freq:"Не вказано",
+ v:"20120211100010",plus:["Кілька експертів у команді","Довга підписка на пів року"],minus:["Не наш вік: вагітність і немовлята","Facebook, а не Telegram"],
+ sig:"Ніша 0–3 переповнена. Ми туди не йдемо.",url:"https://www.alternativemedicine.com.ua/health-club-for-moms/"},
+{id:"ptashka",n:"Ptashka Club",by:"Анна Принц",cat:"club",ic:"zoom",price:"150 €/міс · 360 €/квартал",m:7200,
+ fmt:"4 зустрічі по 2 години в Google Meet щонеділі, закритий чат, записи",who:"Українки в Україні й за кордоном; про дітей не йдеться",freq:"Щотижня, 2 години",
+ v:"20220221100020",plus:["Камерна група, особисте знайомство","Чітка обіцянка: 2 години на тиждень"],minus:["Не про батьківство","Дуже дорого для широкої аудиторії"],
+ sig:"Суміжний ринок: жінки платять багато за щотижневе коло. Формат «Батьківського кола» має попит.",url:"https://ptashka.club/"},
+{id:"pediatr",n:"Спокійні батьки з першого дня",by:"Ольга Манастирська, педіатриня",cat:"course",ic:"tg",price:"490 грн (було 1290)",m:490,
+ fmt:"15 відеоуроків у Telegram, закритий чат з авторкою, доступ 6 місяців",who:"Вагітні і батьки немовлят, тати теж",freq:"Записаний курс",
+ v:"20020222210000",plus:["Курс повністю в Telegram, без окремих платформ","Повернення грошей за 14 днів"],minus:["Тільки перший рік життя","Немає живих зустрічей"],
+ sig:"Доказ, що навчальний продукт у Telegram працює і продається.",url:"https://modernparents.in.ua/"},
+{id:"pidlitkologia",n:"Підліткологія",by:"Діана Житня-Кебас",cat:"course",ic:"web",price:"Ціна не вказана на сайті",m:null,
+ fmt:"7-тижневий онлайн-курс потоками, вебінари й інтенсиви в записі",who:"Батьки, вчителі й психологи підлітків",freq:"Потоки (найближчий: березень 2026)",
+ v:"221?122?111?00",plus:["Відома експертка з підлітків, 17 років практики","Окремий інтенсив про самовизначення підлітка"],minus:["Курс із кінцем","Лише підлітки, без молодшого віку"],
+ sig:"Сильна гостя для круглого столу на тему підлітків і профорієнтації.",url:"https://www.pidlitkologia.com/"},
+{id:"mip",n:"Емоційний інтелект для батьків підлітків",by:"Міжнародний інститут психології",cat:"course",ic:"zoom",price:"2200 грн (990 грн на ранній реєстрації)",m:null,mr:[990,2200],
+ fmt:"4 онлайн-вебінари по середах о 17:00, записи, тест і сертифікат",who:"Батьки підлітків",freq:"Раз на тиждень, 4 тижні",
+ v:"22101220110000",plus:["Чіткий тижневий ритм, середа як у нас","Записи і сертифікат"],minus:["Закінчується за місяць","Немає чату для учасників"],
+ sig:"Ціна 2200 грн за 4 вебінари показує, що наші 390 грн за 4 зустрічі дуже вигідні.",url:"https://www.psychologyed.org/emotionalintelligenceparents"},
+{id:"sablina",n:"Комунікація з дитиною, коли один із батьків на фронті",by:"Тренінговий центр Наталії Сабліної",cat:"course",ic:"tg",price:"Не вказано",m:null,
+ fmt:"Онлайн-курс, зв'язок через Telegram, вебінари на YouTube",who:"Батьки, педагоги, психологи",freq:"Потоки",
+ v:"211102?1?1000?",plus:["Вузька актуальна тема для родин військових"],minus:["Мало відкритої інформації про формат і ціну"],
+ sig:"Тема родин військових варта окремого круглого столу.",url:"https://www.education.ua/blog/48971/"},
+{id:"pidtrymai",n:"Підтримай дитину",by:"МОН і психологи",cat:"tg",ic:"tg",price:"Безкоштовно",m:0,
+ fmt:"Telegram-канал: щоденні дописи психологів, короткі відео, огляди книжок, ігри",who:"Батьки, педагоги, психологи",freq:"Багато дописів щодня",
+ v:"21110222211122",plus:["13,2 тис. підписників","Щоденний якісний контент від психологів"],minus:["Монолог: немає закритої спільноти і розкладу живих подій","Немає поділу за віком"],
+ sig:"Безкоштовні поради вже є. Наш відкритий канал не може бути просто ще одним каналом порад.",url:"https://t.me/s/pidtrumaidutuny"},
+{id:"stijkist",n:"Стійкість для стійких",by:"Світлана Ройз, ГО «Вчися»",cat:"tg",ic:"tg",price:"Безкоштовно",m:0,
+ fmt:"Telegram-канал: ранкове натхнення, практика «2 хвилини для себе», вечірні роздуми",who:"Освітяни, батьки, усі дорослі",freq:"Близько 3 дописів на день",
+ v:"20010222110022",plus:["13 тис. підписників і найвідоміше ім'я в дитячій психології","Короткі практики для самих дорослих"],minus:["Про стан дорослого, не про виховання","Немає спілкування між учасниками"],
+ sig:"Підтримка батьків як окрема тема працює. У нас для цього гілка «Вдих».",url:"https://t.me/s/stijkist"},
+{id:"askmama",n:"Спільнота українських мам",by:"спільнота",cat:"tg",ic:"tg",price:"Безкоштовно",m:0,
+ fmt:"Telegram-чат: мами питають і діляться досвідом",who:"Мами",freq:"Без розкладу",
+ v:"21020012000?22",plus:["Розмова рівних без бар'єрів"],minus:["Немає експертів і модерації змісту","Маленька: 566 учасників"],
+ sig:"Чати мам без експерта не ростуть. Модерація і експерт роблять нашу спільноту цінною.",url:"https://t.me/AskMamaUA"},
+{id:"edwings",n:"Family Club EdWings",by:"освітній центр EdWings, Харків",cat:"tg",ic:"tg",price:"Безкоштовно",m:0,
+ fmt:"Telegram-спільнота батьків, які цікавляться розвитком дітей",who:"Батьки учнів центру і не лише",freq:"Без розкладу",
+ v:"21021112011?22",plus:["Освітній центр будує спільноту батьків навколо навчання"],minus:["352 учасники, без регулярних подій"],
+ sig:"Інший освітній бізнес пробує ту саму ідею. Ми робимо її системно і щотижня.",url:"https://t.me/edwings_kh"},
+{id:"tyiak",n:"Підлітковий вік: карта для дорослих",by:"«Ти як?», Світлана Ройз, Діана Житня-Кебас",cat:"free",ic:"video",price:"Безкоштовно",m:0,
+ fmt:"Відеокурс із сертифікатом і балами БПР",who:"Батьки, родичі підлітків, педагоги",freq:"У своєму темпі",
+ v:"22001220210?02",plus:["Найсильніші експертки країни, безкоштовно","Психологія, нейробіологія і практичні інструменти"],minus:["Без живого контакту і спільноти","Закінчується разом із курсом"],
+ sig:"Теорія про підлітків доступна безкоштовно. Ми продаємо розмову про свою ситуацію.",url:"https://howareu.com/pidlitkovyi-vik-karta-dlia-doroslykh"},
+{id:"zrozumilo",n:"Курси Світлани Ройз на «Зрозуміло!»",by:"Світлана Ройз",cat:"free",ic:"video",price:"Безкоштовно",m:0,
+ fmt:"Онлайн-курси «Як підтримати дитину під час війни», «Повітряна тривога у школі»",who:"Батьки і освітяни",freq:"У своєму темпі",
+ v:"21000220210002",plus:["Відкритий доступ, практичні інструменти"],minus:["Тільки тема війни і тривог"],
+ sig:"Тему тривог закрито безкоштовно. У нас вона одна з багатьох, а не головна.",url:"https://nus.org.ua/2026/10/13/yak-pidtrymaty-ditej-pid-chas-povitryanyh-tryvog-dostupni-bezoplatni-kursy-vid-svitlany-rojz/"},
+{id:"diia",n:"Безпека дітей в інтернеті для батьків",by:"Дія.Освіта, Мінцифри",cat:"free",ic:"video",price:"Безкоштовно",m:0,
+ fmt:"Освітній серіал, серії по 5–12 хвилин: сімейні правила, соцмережі, месенджери",who:"Батьки",freq:"У своєму темпі",
+ v:"21000221210202",plus:["Короткі серії, легко дивитись з телефону","Сімейні правила як готовий інструмент"],minus:["Без розмови і запитань","Немає поділу за віком"],
+ sig:"Тему гаджетів держава подає як інструкцію. Ми додаємо розмову і досвід IT-академії.",url:"https://osvita.diia.gov.ua/courses/serial-dlya-batkiv-onlayn-bezpeka-ditey"},
+{id:"stop",n:"Стоп насильству: виховання хлопців-підлітків",by:"фонд «Сильні», Рада Європи",cat:"free",ic:"video",price:"Безкоштовно",m:0,
+ fmt:"5 коротких відеолекцій на YouTube, конспекти, алгоритми, сертифікат",who:"Батьки, вчителі, шкільні психологи",freq:"У своєму темпі",
+ v:"22001220210002",plus:["Чітка тема й відомий ведучий","Готові алгоритми дій"],minus:["Одна тема, без продовження"],
+ sig:"Можлива тема для круглого столу про підлітків.",url:"https://sadok.ua/news/v-ukrayini-startuye-bezkoshtovnyy-onlayn-kurs-pro-nenasylnytske-vykhovannya-khloptsiv"},
+{id:"batko247",n:"Батько 24/7",by:"ГО «Міжнародний центр батьківства»",cat:"free",ic:"web",price:"Безкоштовно",m:0,
+ fmt:"Платформа з онлайн-курсом «Як бути батьком»",who:"Тати",freq:"У своєму темпі",
+ v:"21000120120012",plus:["Єдина платформа саме для тат"],minus:["Один курс, без живих подій і спільноти"],
+ sig:"Тати — окрема аудиторія, з якою ніхто не працює системно.",url:"https://www.education.ua/courses/company/32170/"},
+{id:"tatohub",n:"Tatohub.Київ",by:"Київська міська влада",cat:"free",ic:"zoom",price:"Безкоштовно",m:0,
+ fmt:"Онлайн-клуб для тат: курси по 5–6 занять, вебінари",who:"Тати",freq:"Курсами",
+ v:"21110210120012",plus:["Окремий простір для тат"],minus:["Муніципальний проєкт, активність не підтверджена"],
+ sig:"Тато-гість на круглому столі дає те, чого бракує мамським клубам.",url:"https://life.pravda.com.ua/society/2021/04/07/244471/",unv:"Дані 2021 року, поточну активність не перевірено"},
+{id:"shliakh",n:"Шлях батьківства",by:"Мінсоцполітики, ЄС, ЮНІСЕФ",cat:"free",ic:"video",price:"Безкоштовно",m:0,
+ fmt:"Відео на YouTube і в соцмережах",who:"Батьки дітей 0–6",freq:"Регулярні відео",
+ v:"20001221110022",plus:["Державна підтримка і реальний досвід батьків"],minus:["Тільки 0–6"],
+ sig:"Дошкільний вік держава закриває. Гілка 5–7 у нас лише перехідна.",url:"https://www.kmu.gov.ua/news/shliakh-batkivstva-v-ukraini-startuvala-prohrama-dlia-rozvytku-navychok-batkivstva"},
+{id:"numo",n:"НУМО і НУМО!бот",by:"МОН, ЮНІСЕФ",cat:"free",ic:"tg",price:"Безкоштовно",m:0,
+ fmt:"Сайт і бот у Telegram та Viber із щоденними порадами, відеоуроки, ігри",who:"Батьки і вихователі дітей 2–6",freq:"Щодня",
+ v:"20001222210022",plus:["Щоденна порада в месенджері","Ігри і вправи на кожен день"],minus:["Тільки дошкільнята","Немає спілкування"],
+ sig:"Бот із щоденною порадою — простий формат утримання, який можна взяти для гілок.",url:"https://numo.mon.gov.ua/"},
+{id:"bebbo",n:"Bebbo",by:"ЮНІСЕФ",cat:"free",ic:"app",price:"Безкоштовно",m:0,
+ fmt:"Застосунок: поради і трекер розвитку за віком дитини",who:"Батьки дітей від народження до школи",freq:"Постійно",
+ v:"20002222211022",plus:["Персоналізація за віком дитини"],minus:["Тільки до школи","Без живого контакту"],
+ sig:"Персоналізація за віком очікувана навіть у безкоштовному. Вікові гілки обов'язкові.",url:"https://play.google.com/store/apps/details?id=org.unicef.ecar.bebbo"},
+{id:"kolo",n:"Академія батьківства",by:"центр «Коло сім'ї»",cat:"free",ic:"video",price:"Не вказано",m:0,
+ fmt:"Короткі відео фахівців, записи вебінарів; 40 відео про стійкість дітей",who:"Батьки дітей і підлітків",freq:"Бібліотека",
+ v:"2100022011002?",plus:["Короткі практичні відео від дитячого психіатра"],minus:["Тільки бібліотека, без спільноти"],
+ sig:"Короткі відео від фахівця легко переглядати, тож нарізки з наших ефірів мають сенс.",url:"https://k-s.org.ua/resources/p-academy/"},
+{id:"poruch",n:"ПОРУЧ",by:"МОН, ЮНІСЕФ, УІКПТ, ВГЦ «Волонтер»",cat:"group",ic:"zoom",price:"Безкоштовно",m:0,
+ fmt:"Групи до 10 людей у Zoom з психологом, плюс індивідуальні консультації",who:"Батьки",freq:"2 рази на тиждень по 90 хв, один місяць",
+ v:"21220200110002",plus:["Мала група і живий психолог","Безкоштовно"],minus:["Лише місяць","Про стрес і невизначеність, а не про щоденне виховання"],
+ sig:"Формат малої групи працює. Його можна взяти для «Батьківського кола».",url:"https://poruch.me/parents"},
+{id:"vazhlyvi",n:"Групи підтримки «Важливі»",by:"ГО «Важливі»",cat:"group",ic:"zoom",price:"Безкоштовно",m:0,
+ fmt:"Онлайн-групи 8–10 людей з психологом",who:"Дружини військових, жінки, які втратили партнера",freq:"Щотижня по 1,5 год, 3–4 місяці",
+ v:"20220200100002",plus:["Довгий цикл і постійна група"],minus:["Вузька аудиторія, не про дітей"],
+ sig:"Кризові випадки направляємо до таких організацій. Варто додати їх у «Карту допомоги».",url:"https://important.org.ua/grupi-pidtrimki-dlya-batkiv"},
+{id:"myrna",n:"Діалог з дітьми",by:"проєкт «Мирна школа», Ірина Ільїнова",cat:"group",ic:"zoom",price:"Безкоштовно",m:0,
+ fmt:"10 зустрічей у Zoom, 80% практики",who:"Батьки",freq:"Двічі на тиждень",
+ v:"22220200211002",plus:["Практика замість лекцій","Тема самостійності і відповідальності дитини"],minus:["Разовий потік із відбором учасників"],
+ sig:"Практикум з вправами — правильний формат. Він у нас щомісяця.",url:"https://osvita.ua/school/90820/",unv:"Потік 2023/2024, чи будуть нові, не перевірено"},
+{id:"optima",n:"Вебінари для батьків Optima",by:"дистанційна школа Optima",cat:"school",ic:"video",price:"Безкоштовно",m:0,
+ fmt:"Разові вебінари для батьків, записи на YouTube, розділ «Для батьків» на сайті",who:"Батьки учнів і майбутніх учнів",freq:"Епізодично",
+ v:"22100120012012",plus:["Тема навчання і вибору профілю","Вебінар як воронка в школу"],minus:["Немає спільноти і регулярності","Психологія не в центрі"],
+ sig:"Онлайн-школи роблять лише разові вебінари. Постійний клуб для батьків учнів поки є тільки в нас.",url:"https://optima.school/presentation/vebinar-31032026-profilna-skola-use-so-treba-znati-batkam"},
+{id:"klb",n:"Форум неІдеальних батьків",by:"Київський ліцей бізнесу, Університет «КРОК»",cat:"school",ic:"people",price:"Не вказано",m:null,
+ fmt:"Очний форум раз на рік, батьківський клуб ліцею",who:"Батьки підлітків",freq:"Раз на рік",
+ v:"22010200112?0?",plus:["Мотивація, профорієнтація, помилки як частина навчання","Назва з тим самим посилом: «неідеальні батьки»"],minus:["Офлайн, Київ, раз на рік"],
+ sig:"Наша тема «Ідеальних батьків не буває» резонує ринку. Спікерів форуму можна кликати на круглі столи.",url:"https://klb.education/vii-forum.html"},
+{id:"goodinside",n:"Good Inside",by:"Dr. Becky Kennedy, США",cat:"intl",ic:"app",price:"$84/3 міс · $279/рік",m:1162,
+ fmt:"Застосунок і спільнота: щоденні сесії «Ask a Coach», щомісячний ефір авторки, воркшопи, ШІ-помічник",who:"Батьки дітей 0–18",freq:"Щодня з коучами, щомісяця з авторкою",
+ v:"02222222211120",plus:["Щоденний живий контакт з коучами","Кімнати спільноти за темами і віком"],minus:["Англійською, дорого для України"],
+ sig:"Еталон моделі: автор раз на місяць + команда щотижня. Ми робимо так само: вебінар місяця + 3 інші формати.",url:"https://www.goodinside.com/blog/what-is-good-inside-membership/"},
+{id:"growthminded",n:"GrowthMinded",by:"Big Life Journal, США",cat:"intl",ic:"web",price:"$75/квартал · $240/рік",m:1038,
+ fmt:"Платформа і чати: коучі 1:1, щомісячний ефір з експертом, воркшопи, 500+ матеріалів, вправи для дітей",who:"Батьки дітей до 5, 5–8, 9–12, підлітків",freq:"Щомісяця + дзвінки з коучами",
+ v:"02122212212021",plus:["Вікові треки і матеріали для дітей","7 днів безкоштовно"],minus:["Англійською, без українських реалій"],
+ sig:"Вправа «зроби разом із дитиною» після практикуму — те, що можна додати в шпаргалки.",url:"https://biglifejournal.com/products/growthminded-free-trial"},
+{id:"classdojo",n:"ClassDojo Plus",by:"ClassDojo, США",cat:"intl",ic:"app",price:"$59,99/рік на сім'ю",m:207,
+ fmt:"Шкільний застосунок: безкоштовна база + преміум для батьків",who:"Сім'ї учнів 4–14",freq:"Постійно",
+ v:"02000012112021",plus:["Батьки платять за продовження шкільного досвіду вдома"],minus:["Не про психологію"],
+ sig:"Модель «школа дає батькам продукт» уже існує у світі.",url:"https://vator.tv/2024-08-23-how-does-classdojo-make-money/"},
+];
+const US={id:"us",n:"PRO Батьків (план MVP 1)",cat:"us",v:"22222222222222",m:390};
+
+const val=c=>c==="?"?null:+c;
+const ua=P.filter(p=>p.cat!=="intl");
+// stats
+const free=ua.filter(p=>p.m===0).length;
+document.getElementById("stats").innerHTML=[
+ [P.length,"продуктів проаналізовано"],[ua.length,"з них українські"],[free,"українських безкоштовних"],["490–1200","грн/міс коштують платні клуби"],["0","спільнот, поділених за віком школяра"]
+].map(([b,s])=>`<div class="stat"><b class="mono">${b}</b><span>${s}</span></div>`).join("");
+
+// map
+(function(){
+ const xs=[["Безкоштовно",m=>m===0],["До 500 грн",m=>m>0&&m<=500],["500–1200 грн",m=>m>500&&m<=1200],["Понад 1200 грн",m=>m>1200]];
+ const ys=[[4,"Регулярні зустрічі і спільнота"],[3,"Одне є, друге частково"],[2,"Щось одне або обидва частково"],[1,"Трохи живого контакту"],[0,"Лише читати або дивитися"]];
+ const items=[...P.filter(p=>p.m!=null),US].map(p=>{const v=[...p.v];const y=(val(v[2])||0)+(val(v[3])||0);return{p,y}});
+ let h=`<div class="h">Живе спілкування ↓<br>Ціна за місяць →</div>`+xs.map(x=>`<div class="h">${x[0]}</div>`).join("");
+ ys.forEach(([y,l])=>{h+=`<div class="yl">${l}</div>`;xs.forEach(([,f])=>{const it=items.filter(i=>i.y===y&&f(i.p.m));
+  h+=`<div class="cell${it.length?"":" empty"}">${it.map(i=>`<span class="pin${i.p.cat==="us"?" us":i.p.cat==="intl"?" intl":""}">${i.p.n.replace(" (план MVP 1)","")}</span>`).join("")}</div>`})});
+ document.getElementById("map").innerHTML=h;
+})();
+
+// filters + cards
+let cur="all";
+const cats=["all",...Object.keys(CAT)];
+function renderFilters(){
+ document.getElementById("filters").innerHTML=cats.map(c=>{const n=c==="all"?P.length:P.filter(p=>p.cat===c).length;
+  return `<button class="chip" id="f-${c}" aria-pressed="${c===cur}" data-c="${c}">${c==="all"?"Усі":CAT[c]}<span class="n">${n}</span></button>`}).join("");
+}
+function host(u){try{return new URL(u).host.replace("www.","")}catch(e){return u}}
+function renderCards(){
+ const list=P.filter(p=>cur==="all"||p.cat===cur);
+ document.getElementById("cards").innerHTML=list.map(p=>`
+ <article class="card">
+  <div class="shot"><span class="ico">${ICO[p.ic]}</span><span class="url">${host(p.url)}${new URL(p.url).pathname.length>1?new URL(p.url).pathname:""}</span></div>
+  <div class="top">
+   <div class="tags"><span class="tag ${p.m===0?"free":"paid"}">${p.m===0?"безкоштовно":"платно"}</span><span class="tag">${CAT[p.cat]}</span></div>
+   <h3>${p.n}</h3><div style="font-size:13px;color:var(--muted)">${p.by}</div>
+   <div class="price">${p.price}</div>
+  </div>
+  <div class="body">
+   <dl class="kv"><dt>Формат</dt><dd>${p.fmt}</dd><dt>Для кого</dt><dd>${p.who}</dd><dt>Частота</dt><dd>${p.freq}</dd></dl>
+   <div class="pm">${p.plus.map(t=>`<div><span class="plus">+</span><span>${t}</span></div>`).join("")}${p.minus.map(t=>`<div><span class="minus">−</span><span>${t}</span></div>`).join("")}</div>
+   <div class="signal"><b>Для нас: </b>${p.sig}</div>
+   ${p.unv?`<div class="unverified">${p.unv}</div>`:""}
+  </div>
+  <div class="foot"><a href="${p.url}" target="_blank" rel="noopener">Відкрити сайт</a></div>
+ </article>`).join("");
+}
+document.getElementById("filters").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;cur=b.dataset.c;renderFilters();renderCards();try{localStorage.setItem("rynok-f",cur)}catch(_){}});
+try{const s=localStorage.getItem("rynok-f");if(s&&cats.includes(s))cur=s}catch(_){}
+renderFilters();renderCards();
+
+// matrix
+(function(){
+ const cell=c=>`<td>${c==="?"?`<span class="dq" title="не вдалося перевірити">?</span>`:`<i class="dot d${c}" role="img" aria-label="${["немає","частково","є"][+c]}"></i>`}</td>`;
+ let h=`<thead><tr><th class="name">Продукт</th>${F.map(f=>`<th><span>${f[1]}</span></th>`).join("")}</tr></thead><tbody>`;
+ h+=`<tr class="us"><td class="name">${US.n}</td>${[...US.v].map(cell).join("")}</tr>`;
+ Object.keys(CAT).forEach(c=>{h+=`<tr class="grp"><td class="name" colspan="1">${CAT[c]}</td><td colspan="${F.length}"></td></tr>`;
+  P.filter(p=>p.cat===c).forEach(p=>{h+=`<tr><td class="name">${p.n}</td>${[...p.v].map(cell).join("")}</tr>`})});
+ const cov=F.map((f,i)=>{let s=0;ua.forEach(p=>{const x=val(p.v[i]);if(x)s+=x/2});return Math.round(s/ua.length*100)});
+ h+=`</tbody><tfoot><tr><td class="name">Частка українських продуктів</td>${cov.map(x=>`<td>${x}%</td>`).join("")}</tr></tfoot>`;
+ document.getElementById("mx").innerHTML=h;
+ // coverage bars
+ const order=F.map((f,i)=>({f,i,c:cov[i]})).sort((a,b)=>b.c-a.c);
+ let ch=`<div class="ticks"><span></span><div class="t"><span>0%</span><span>50%</span><span>100%</span></div><span></span></div>`;
+ ch+=order.map(o=>{const l=o.c>=60?"hi":o.c>=30?"mid":"lo";return `<div class="covrow lvl-${l}"><span>${o.f[1]}</span><div class="bar"><i style="width:${o.c}%"></i></div><span class="mono">${o.c}%</span></div>`}).join("");
+ document.getElementById("cov").innerHTML=ch+`<div class="legend" style="margin-top:6px"><span><i class="dot" style="background:var(--muted)"></i> 60% і більше: є майже в усіх</span><span><i class="dot" style="background:var(--accent)"></i> 30–59%: є в небагатьох</span><span><i class="dot" style="background:var(--gold)"></i> до 30%: рідкість</span></div>`;
+})();
+
+// price chart (scale 0–2000; values above are broken)
+(function(){
+ const MAX=2000;const pct=x=>Math.min(x,MAX)/MAX*100;
+ const rows=[
+  ["PRO Батьків",390,null,"us"],["ClassDojo Plus (річна)",207,null,"intl"],["Клуб майбутніх мам (6 міс)",450,null,""],["SuperMamaClub",490,null,""],
+  ["Be Happy Children (річна)",760,null,""],["Be Happy Children",1056,null,""],["Be Happy Space (річна)",1200,null,""],
+  ["GrowthMinded (річна)",830,null,"intl"],["Good Inside (річна)",965,null,"intl"],["Good Inside (3 міс)",1162,null,"intl"],
+  ["Клуб щасливих мам (тариф)",1000,2700,"range"],["ЕІ для батьків підлітків (курс)",990,2200,"range"],["Ptashka Club",7200,null,""]
+ ].sort((a,b)=>a[1]-b[1]);
+ const band=`<div class="pband" style="left:${pct(1000)}%;width:${pct(1800)-pct(1000)}%" title="Консультація психолога 1000–1800 грн"></div>`;
+ let h=rows.map(([n,a,b,k])=>{const w=b?pct(b)-pct(a):pct(a);const left=b?pct(a):0;const over=(b||a)>MAX;
+  const lbl=b?`${a}–${b}`:`${a}`;const lx=Math.min((b?pct(b):pct(a))+1,82);
+  return `<div class="prow"><span>${n}</span><div class="ptrack">${band}<div class="pbar ${k==="range"?"range":k}" style="left:${left}%;width:${w}%"></div>${over?`<span class="brk" style="left:94%"></span>`:""}<span class="pval" style="left:${lx}%">${lbl} грн</span></div></div>`}).join("");
+ h+=`<div class="prow"><span></span><div class="paxis">${[0,500,1000,1500,2000].map(v=>`<span style="left:${pct(v)}%">${v}</span>`).join("")}</div></div>`;
+ document.getElementById("pc").innerHTML=h+`<div class="legend"><span><i class="dot" style="background:var(--gold)"></i> PRO Батьків</span><span><i class="dot" style="background:var(--accent)"></i> українські</span><span><i class="dot" style="background:var(--muted)"></i> міжнародні</span><span><i class="dot" style="background:var(--red-soft);border:1px dashed var(--red)"></i> одна консультація психолога</span><span>Смуги понад 2000 грн обрізано</span></div>`;
+})();
+
+
+// ideas
+const IDEAS=[
+{t:"Пробний тиждень без оплати",from:"Be Happy Children, GrowthMinded: 7 днів безкоштовно",d:"yes",
+ why:"Батькам ззовні важко заплатити за клуб, якого вони не бачили. Тиждень у клубі з однією живою зустріччю показує цінність краще за будь-який пост.",
+ how:["У боті SendPulse кнопка «Спробувати 7 днів» поруч із «Оплатити».","Бот додає людину в клуб без картки і ставить таймер на 7 днів.","На 5-й день бот пише: «Вам сподобалась середа? Залишайтесь за 390 грн/міс» і дає кнопку оплати.","На 8-й день без оплати бот закриває доступ; повторна спроба для того самого акаунта недоступна."],
+ who:"Модератор налаштовує один раз разом з ботом оплати",when:"До 28.10, разом із ботом",metric:"Частка тих, хто оплатив після пробного тижня"},
+{t:"Відповіді на запитання батьків як ритуал",from:"Be Happy: відповіді двічі на тиждень; Good Inside: щоденні «Ask a Coach»",d:"yes",
+ why:"Батьки платять, коли чують відповідь саме на свою ситуацію. Щоденні відповіді нам не по силі, але кожна середа може починатися з них.",
+ how:["У понеділковому анонсі: «Напишіть запитання до середи в гілку «Питання психологу» або анонімно через бота».","Модератор у вівторок відбирає 3 запитання, близькі до теми зустрічі.","Перші 10 хвилин кожної зустрічі психологиня відповідає на них.","У шпаргалці четверга відповіді коротко дублюються текстом."],
+ who:"Модератор 30 хв на тиждень, психологиня 10 хв ефіру",when:"З першої зустрічі 04.11",metric:"Кількість запитань на тиждень"},
+{t:"Вправа «зробіть разом із дитиною» за віком",from:"GrowthMinded: матеріали для дітей і вікові треки",d:"yes",
+ why:"Інструмент, який можна застосувати того ж вечора, вже є нашим правилом. Вправа з дитиною робить його конкретним і показує цінність вікових гілок.",
+ how:["До кожного практикуму методистка готує одну 10-хвилинну вправу у трьох версіях: 5–7, 8–12, 13–17.","Модератор публікує кожну версію у свою вікову гілку в четвер разом зі шпаргалкою.","У гілці просимо поділитися, як пройшло: це дає розмову між ефірами."],
+ who:"Методистка 1 год на місяць",when:"З практикуму 18.11",metric:"Повідомлення у вікових гілках"},
+{t:"Короткі нарізки ефірів",from:"Дія.Освіта: серії по 5–12 хв; «Коло сім'ї»: короткі відео фахівців",d:"yes",
+ why:"Повний запис на годину дивляться небагато. Фрагмент на 1–3 хвилини працює і в клубі, і як реклама у відкритому каналі.",
+ how:["Під час ефіру модератор позначає 2 сильні моменти з таймкодом.","У четвер вирізає їх у CapCut і додає субтитри.","Один фрагмент іде в клуб поруч із записом, другий у відкритий канал і Reels з кнопкою «Вступити в клуб»."],
+ who:"Модератор 1 год на тиждень",when:"З 05.11",metric:"Перегляди фрагментів і переходи в бот"},
+{t:"Голос батьків у «Батьківському колі» замість малих груп",from:"ПОРУЧ і «Важливі»: групи до 10 людей",d:"yes",
+ why:"Окремі групи в Zoom зламали б принцип «усе в Telegram», а групи по 10 потребують кількох ведучих. Але відчуття кола можна дати в самій трансляції.",
+ how:["У понеділок у гілці питаємо, хто готовий розповісти свою історію голосом.","Ведуча заздалегідь домовляється з 4–6 батьками.","Під час ефіру запрошує їх говорити по черзі через функцію «Запросити говорити» в трансляції Telegram.","Решта слухає і пише в чат трансляції; психологиня підсумовує."],
+ who:"Методистка 30 хв на підготовку",when:"З кола 04.11",metric:"Скільки батьків говорили голосом"},
+{t:"ШІ-помічник між ефірами",from:"Be Happy Space: ШІ-куратор 24/7; Good Inside: помічник Gigi",d:"later",
+ why:"Ідея корисна, але в MVP 1 ризикована: ШІ може дати пораду в кризовій ситуації без психолога, а в нас ще мало власних матеріалів, на які він би спирався.",
+ how:["Збираємо базу: записи з хештегами, шпаргалки, відповіді психологині.","У лютому вирішуємо, чи робити бота, який лише знаходить потрібний запис або шпаргалку і не дає порад сам.","Кризові слова в запитанні відправляють людину до модератора і в «Карту допомоги»."],
+ who:"Потрібен розробник або готовий сервіс",when:"Рішення в лютому 2027",metric:"—"},
+{t:"Повернення грошей за перший місяць",from:"Good Inside і курс педіатрині: повернення протягом 14 днів",d:"no",
+ why:"Пробний тиждень знімає той самий страх «а раптом не підійде», але не потребує повернень через WayForPay і фінвідділ. Два механізми одночасно зайві.",
+ how:[],who:"",when:"",metric:""},
+{t:"Щоденна порада від бота",from:"НУМО!бот: щоденні поради в Telegram і Viber",d:"no",
+ why:"У нас уже 5 дописів на тиждень. Щоденні повідомлення стануть шумом, і батьки вимкнуть сповіщення від клубу.",
+ how:[],who:"",when:"",metric:""}
+];
+const BL={yes:["b-yes","Беремо в MVP 1"],later:["b-later","Відкладаємо до MVP 2"],no:["b-no","Не беремо"]};
+document.getElementById("ideas").innerHTML=IDEAS.map(i=>`<article class="idea ${i.d}">
+ <div class="l"><i class="badge ${BL[i.d][0]}">${BL[i.d][1]}</i><h3>${i.t}</h3><div class="from">${i.from}</div></div>
+ <div class="r"><p class="why">${i.why}</p>${i.how.length?`<ol>${i.how.map(h=>`<li>${h}</li>`).join("")}</ol>`:""}
+ ${i.who?`<div class="meta"><span>Хто: <b>${i.who}</b></span><span>Коли: <b>${i.when}</b></span>${i.metric!=="—"?`<span>Що міряємо: <b>${i.metric}</b></span>`:""}</div>`:""}</div>
+</article>`).join("");
+
+// sources
+document.getElementById("src").innerHTML=P.map(p=>`<li><a href="${p.url}" target="_blank" rel="noopener">${p.n}</a> · ${host(p.url)}</li>`).join("")+
+ `<li><a href="https://support.goodinside.com/hc/en-us/articles/4416301207060-How-much-does-Good-Inside-cost" target="_blank" rel="noopener">Ціни Good Inside</a></li>`+
+ `<li><a href="https://proroditeli.com/bhs" target="_blank" rel="noopener">Be Happy Space</a></li>`+
+ `<li><a href="https://www.unicef.org/ukraine/current-projects-parenting" target="_blank" rel="noopener">Проєкти ЮНІСЕФ для батьків</a></li>`+
+ `<li><a href="https://www.psykholoh.com/post/%D1%81%D0%BA%D1%96%D0%BB%D1%8C%D0%BA%D0%B8-%D0%BA%D0%BE%D1%88%D1%82%D1%83%D1%94-%D0%B4%D0%B8%D1%82%D1%8F%D1%87%D0%B8%D0%B9-%D0%BF%D1%81%D0%B8%D1%85%D0%BE%D0%BB%D0%BE%D0%B3" target="_blank" rel="noopener">Ціни на дитячого психолога у 2026</a></li>`+
+ `<li><a href="https://www.unian.ua/lite/stars/bloger-vikriv-veduchogo-supermami-dmitra-karpachova-za-osvitoyu-ne-psiholog-12386313.html" target="_blank" rel="noopener">Про освіту ведучого SuperMamaClub</a></li>`+
+ `<li><a href="https://tglist.com.ua/en/catalog/family-and-kids" target="_blank" rel="noopener">Каталог Telegram-каналів «Сім'я і діти»</a></li>`;
+</script>
